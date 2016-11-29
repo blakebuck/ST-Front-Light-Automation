@@ -17,16 +17,19 @@ definition(
 
 preferences {
     section("Turn on when opened:") {
-		input "contact", "capability.contactSensor", required: true, title: "What?"
+		input "contact", "capability.contactSensor", required: false, title: "What?"
     }
 	section("When there's motion on any of these sensors") {
-		input "motion", "capability.motionSensor", required: true
+		input "motion", "capability.motionSensor", required: false
 	}
 	section("Turn on these lights") {
-		input "switches", "capability.switch", multiple: true, required: true, title: "Which?"
+		input "light", "capability.switch", required: true, title: "Which?"
 	}
 	section("Turn light off when no motion for ") {
 		input "timeOn", "number", description: "Number of minutes", required: true, title: "Minutes"
+	}
+    section("Turn light off if already on?") {
+    	input "offAlreadyOn", "enum", options: ["Yes", "No"], title: "Default: Yes", defaultValue: "Yes"
 	}
 }
 
@@ -47,9 +50,11 @@ def initialize() {
 }
 
 def turnLightOn(evt){
+	state.lightPrevState = light.currentValue("switch")
+    log.debug "Previous State: $state.lightPrevState"
 	if ("open" == evt.value || "active" == evt.value){
 		if (nightTime()){
-			switches?.on()
+			light?.on()
 			lightTimer()
 		}		
 	}
@@ -62,7 +67,9 @@ def lightTimer(){
 
 
 def turnLightOff(){
-	switches?.off()
+	if ((state.lightPrevState == "on" && offAlreadyOn == "Yes") || state.lightPrevState == "off"){
+    	light?.off()
+    }	
 }
 
 def nightTime(){
