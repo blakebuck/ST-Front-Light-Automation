@@ -26,7 +26,7 @@ preferences {
 		input "switches", "capability.switch", multiple: true, required: true, title: "Which?"
 	}
 	section("Turn light off when no motion for ") {
-		input "timeOn", "number", description: "Number of minutes", required: true
+		input "timeOn", "number", description: "Number of minutes", required: true, title: "Minutes"
 	}
 }
 
